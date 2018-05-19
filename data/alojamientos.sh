@@ -1,0 +1,1 @@
+sqlldr CONTROL=alojamientos.ctl   skip=1   

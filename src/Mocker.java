@@ -1,25 +1,25 @@
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.concurrent.ThreadLocalRandom;
 
-import javax.xml.crypto.dsig.CanonicalizationMethod;
 
 public class Mocker {
 
 	public static void main(String[] args) {
-
 		Mocker mocker = new Mocker();
 		try {
 			mocker.mockClientes(90000);
 			mocker.generarHoteles(100);
 			mocker.generarHostales(150);
 			mocker.generarViviendas(100);
-			mocker.generarHostalRoom(120, 150);
 			mocker.generarHotelRoom(120, 100);
+			mocker.generarHostalRoom(120, 150);
 			mocker.generarInmueble(1000);
+			mocker.generarViviendaRoom(150, 100);
+			mocker.generarVecinos(2000);
+			mocker.generarReservas(900000);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -40,6 +40,8 @@ public class Mocker {
 	public static final String INMUEBLE = "./data/inmueble.csv";
 	public static final String VECINO = "./data/vecino.csv";
 	public static final String VECINOROOM = "./data/vecinoRoom.csv";
+	public static final String VIVIENDAROOM = "./data/viviendaRoom.csv";
+	public static final String RESERVAS = "./data/reservas.csv";
 
 	public int numDatos = 0;
 	
@@ -305,6 +307,60 @@ public class Mocker {
 		prAlojamiento.close();
 	}
 	
+	public void generarViviendaRoom(int immanuelKant, int cantViviendas) throws IOException {
+		File fileViviendaRoom = new File(VIVIENDAROOM);
+		boolean viviendaRoomExiste = true;
+		if(!fileViviendaRoom.exists()) {
+			fileViviendaRoom.createNewFile();
+			viviendaRoomExiste = false;
+		}
+		FileOutputStream fosViviendaRoom = new FileOutputStream(fileViviendaRoom,true);
+		PrintWriter prViviendaRoom = new PrintWriter(fosViviendaRoom);
+		
+		File fileAlojamiento = new File(ALOJAMIENTOS);
+		boolean alojamientoEx = true;
+		if(!fileAlojamiento.exists()) {
+			fileAlojamiento.createNewFile();
+			alojamientoEx = false;
+		}
+		FileOutputStream fosAlojamiento = new FileOutputStream(fileAlojamiento,true);
+		PrintWriter prAlojamiento = new PrintWriter(fosAlojamiento);
+
+		if(!viviendaRoomExiste) {
+			prViviendaRoom.println("ID,CUARTO,COMPARTIDA,RESTAURANTE,SALADEESTUDIO,SALAESPARCIMIENTO,GYM,PRECIO,IDVIVIENDA");
+		}
+		if(!alojamientoEx) {
+			prAlojamiento.println("ID,PRECIO,CAPACIDAD,DTYPE");
+		}
+
+		//EGNERACION
+		int cont = 0;
+		for(int i = 0; i < cantViviendas; i++) {
+			int idVivienda = (i+(ID_START*4));
+			for(int j = 0; j < immanuelKant; j++) {
+				String hstlString = ((ID_START*4)+cont) + "," 
+			    + j + "," 
+				+ ThreadLocalRandom.current().nextInt(0,2) + ","
+				+ ThreadLocalRandom.current().nextInt(0,2) + ","
+				+ ThreadLocalRandom.current().nextInt(0,2) + ","
+				+ ThreadLocalRandom.current().nextInt(0,2) + ","
+				+ ThreadLocalRandom.current().nextInt(0,2) + ","
+				+ idVivienda;
+				String alojString = ((ID_START*4)+cont) + "," 
+				+ ThreadLocalRandom.current().nextInt(100, 10001) + "," 
+				+ ThreadLocalRandom.current().nextInt(1, 11) + ",HOTELROOM";
+				numDatos++;
+				numDatos++;
+				cont++;
+				prViviendaRoom.println(hstlString);
+				prAlojamiento.println(alojString);
+			}
+			
+		}
+		prViviendaRoom.close();
+		prAlojamiento.close();
+	}
+	
 	public void generarInmueble(int immanuelKant) throws IOException {
 		File fileInmueble = new File(INMUEBLE);
 		boolean inmuebleExiste = true;
@@ -336,12 +392,12 @@ public class Mocker {
 		RandomString rng = new RandomString(10, ThreadLocalRandom.current());
 		String cedula = "1000";
 		for(int i = 0; i < immanuelKant; i++) {
-			String alojaString = ((5*ID_START)+i) + "," 
+			String alojaString = ((3*ID_START)+i) + "," 
 					+ ThreadLocalRandom.current().nextInt(100, 10001) + "," 
 					+ ThreadLocalRandom.current().nextInt(1, 11) + ",INMUEBLE";
 					numDatos++;
 					numDatos++;
-			String inmString = ((5*ID_START)+i) + "," 
+			String inmString = ((3*ID_START)+i) + "," 
 					+ ThreadLocalRandom.current().nextInt(0,2) + "," 
 					+ ThreadLocalRandom.current().nextInt(0,2) + "," 
 					+ ThreadLocalRandom.current().nextInt(0,2) + "," 
@@ -367,7 +423,7 @@ public class Mocker {
 		FileOutputStream fosVecinoRoom = new FileOutputStream(fileVecinoRoom,true);
 		PrintWriter prVecinoRoom = new PrintWriter(fosVecinoRoom);
 		
-		File filePersona = new File(VECINOROOM);
+		File filePersona = new File(PERSONAS);
 		boolean personaExiste = true;
 		if(!filePersona.exists()) {
 			filePersona.createNewFile();
@@ -411,16 +467,66 @@ public class Mocker {
 		}
 
 		//EGNERACION
-		RandomString rng = new RandomString(10, ThreadLocalRandom.current());
+		RandomString rng = new RandomString(15, ThreadLocalRandom.current());
 		String cedula = "2000";
 		for(int i = 0; i < immanuelKant; i++) {
-			String 
+			String vecStr = cedula + i;
+			String perStr = cedula + i + "," + rng.nextString() + "," + generarRolPersona() + "," + generarFecha(1950, 2000);
+			String alojStr = ((5*ID_START)+i) + "," 
+					+ ThreadLocalRandom.current().nextInt(100, 10001) + "," 
+					+ ThreadLocalRandom.current().nextInt(1, 11) + ",VECINOROOM";
+			String vecRoom = ((5*ID_START)+i) 
+					+ ThreadLocalRandom.current().nextInt(1, 5) + ","
+					+ ThreadLocalRandom.current().nextInt(1, 5) + ","
+					+ rng.nextString() + "," 
+					+ rng.nextString() + ","
+					+ cedula + i;
+			numDatos++;
+			numDatos++;
+			numDatos++;
+			numDatos++;
+			prPersona.println(perStr);
+			prAlojamiento.println(alojStr);
+			prVecino.println(vecStr);
+			prVecinoRoom.println(vecRoom);
+			
+			
+					
+		
 		}
+		prPersona.close();
+		prVecino.close();
 		prVecinoRoom.close();
 		prAlojamiento.close();
 	}
 
-
+	public void generarReservas(int immanuelKant) throws IOException {
+		File fileReservas = new File(RESERVAS);
+		boolean reservasExiste = true;
+		if(!fileReservas.exists()) {
+			fileReservas.createNewFile();
+			reservasExiste = false;
+		}
+		FileOutputStream fosReservas = new FileOutputStream(fileReservas,true);
+		PrintWriter prReservas = new PrintWriter(fosReservas);
+		
+		if(!reservasExiste) {
+			prReservas.println("ID,FECHAINICIO,FECHAFIN,PRECIO,CEDULA,CUARTO");
+		}
+		
+		String cedula = "1000";
+		for(int i = 0; i < immanuelKant; i++) {
+			int a = darAlojamiento();
+			String strRes = (ID_START+i) + ","
+					+ generarFechaRes(1990, 2018) + ","
+					+ ThreadLocalRandom.current().nextInt(100,100000) + ","
+					+ cedula + ThreadLocalRandom.current().nextInt(1, 90000) + ","
+					+ ((ID_START*a) +  ThreadLocalRandom.current().nextInt(0,darRangoAloja(a)));
+			numDatos++;
+			prReservas.println(strRes);
+		} 
+		prReservas.close();
+	}
 	
 	
 	public String generarFecha(int anhoI, int anhoF) {
@@ -428,6 +534,19 @@ public class Mocker {
 		fecha += ThreadLocalRandom.current().nextInt(1, 29) + "/";
 		fecha += ThreadLocalRandom.current().nextInt(1, 12) + "/";
 		fecha += ThreadLocalRandom.current().nextInt(anhoI, anhoF+1);
+		return fecha;
+	}
+	
+	public String generarFechaRes(int anhoI, int anhoF) {
+		String fecha = "";
+		int mes = ThreadLocalRandom.current().nextInt(1, 12);
+		int anho = ThreadLocalRandom.current().nextInt(anhoI, anhoF+1);
+		fecha += ThreadLocalRandom.current().nextInt(1, 12) + "/";
+		fecha += mes + "/";
+		fecha += anho + ",";
+		fecha += ThreadLocalRandom.current().nextInt(12, 29) + "/";
+		fecha += mes + "/";
+		fecha += anho + ",";
 		return fecha;
 	}
 
@@ -439,6 +558,39 @@ public class Mocker {
 	public String generarTipoHotelRoom() {
 		String[] roles = {"Suite", "Doble", "Sencilla", "Unica y Diferente"};
 		return roles[ThreadLocalRandom.current().nextInt(0, 4)];
+	}
+	
+	public int darAlojamiento() {
+		double rng = ThreadLocalRandom.current().nextDouble(0, 100);
+		if(rng < 37.5) {
+			return 2;
+		}else if(rng < 62.5)
+			return 1;
+		else if(rng < 64.583)
+			return 3;
+		else if(rng < 68.75)
+			return 5;
+		else if(rng <= 100)
+			return 4;
+		else
+			return -1;
+	}
+	
+	public int darRangoAloja(int rng) {
+		switch (rng) {
+		case 1:
+			return 12000;
+		case 2:
+			return 18000;
+		case 3:
+			return 1000;
+		case 4:
+			return 15000;
+		case 5:
+			return 2000;
+		}
+		return 0;
+		
 	}
 
 
